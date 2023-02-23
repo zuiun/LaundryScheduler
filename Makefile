@@ -2,45 +2,43 @@ CC := gcc
 CFLAGS := -Wall -Wextra
 CFLAGS_EX :=
 CFLAGS_REL := -O3 -g
-CFLAGS_DEB := -Og -g3 -fno-omit-frame-pointer
+CFLAGS_DBG := -Og -g3 -fno-omit-frame-pointer
 
 SRC_DIR := ./src
 TESTS_DIR := ./tests
-BUILD_DIR := ./build
+BLD_DIR := ./build
 
-SRCS := $(wildcard ${SRC_DIR}/*.c)
-HDRS := $(wildcard ${SRC_DIR}/*.h)
-OBJS := $(subst ${SRC_DIR},${BUILD_DIR},$(patsubst %.c,%.o,${SRCS}))
-FILES := ${SRCS} ${HDRS}
+SRCS := scheduler.c
+HDRS := constants.h
+OBJS := $(patsubst %.c,%.o,$(foreach SRC,${SRCS},${BLD_DIR}/${SRC}))
+FILES := $(foreach SRC,${SRCS},${SRC_DIR}/${SRC}) $(foreach HDR,${HDRS},${SRC_DIR}/${HDR})
 PROG := scheduler
 
 .PHONY: all build release debug check clean
-release: CFLAGS_EX := ${CFLAGS_REL}
-debug: CFLAGS_EX := ${CFLAGS_DEB}
 
 # Default target
-all: clean release
-	@echo ${FILES}
+all: clean check print
 
-# Compile, potentially extra flags
-build: ${FILES} ${OBJS}
-	mkdir -p ${BUILD_DIR}
-	${CC} ${CFLAGS} ${CFLAGS_EX} ${OBJS} -o ${BUILD_DIR}/${PROG}
+build: ${FILES} directory ${OBJS}
+	${CC} ${CFLAGS} ${CFLAGS_EX} ${OBJS} -o ${BLD_DIR}/${PROG}
 
-# Compile with release flags
+release: CFLAGS_EX := ${CFLAGS_REL}
 release: build
 
-# Compile with debug flags
+debug: CFLAGS_EX := ${CFLAGS_DBG}
 debug: build
 
-# Compile and run tests
 check: release
+	${BLD_DIR}/${PROG} test
 
-# Remove build files
 clean:
-	@echo target 'clean'
-	rm -f ${BUILD_DIR}/*
+	rm -f ${BLD_DIR}/*
 
-# Compile object (BULID_DIR) from source (SRC_DIR)
-${BUILD_DIR}/%.o: ${SRC_DIR}/%.c
+directory:
+	mkdir -p ${BLD_DIR}
+
+print:
+	@echo ${FILES} ${OBJS}
+
+${BLD_DIR}/%.o: ${SRC_DIR}/%.c
 	${CC} -c ${CFLAGS} $< -o $@
