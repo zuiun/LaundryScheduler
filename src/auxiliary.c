@@ -5,6 +5,29 @@
 #include <string.h>
 #include "auxiliary.h"
 
+/*
+ * Discards extra input in filestream
+ *
+ * stream: FILE* = Filestream to read
+ * input: char* = Filestream input
+ *
+ * Pre: stream == stdin || stream > stderr
+ * Post: None
+ * Return: None
+ */
+void discard_input (FILE* const stream, char* const input) {
+    assert (stream == stdin || stream > stderr);
+
+    // Check if input does not contain entire line
+    if (! strchr (input, '\n')) {
+        char c = '\0';
+
+        do {
+            c = fgetc (stream);
+        } while (c != '\n' && c != EOF);
+    }
+}
+
 void throw_error (char* const message) {
     assert (message != NULL);
 
@@ -20,29 +43,6 @@ void* allocate (size_t size) {
     }
 
     return memory;
-}
-
-/*
- * Discards extra input in filestream
- *
- * stream: FILE* = Filestream to read
- * input: char* = Filestream input
- *
- * Pre: stream == stdin || stream > stderr
- * Post: None
- * Return: None
- */
-void discard_input (FILE* const stream, char* const input) {
-    assert (stream == stdin || stream > stderr);
-
-    if (! strchr (input, '\n')) {
-        char c = '\0';
-
-        do {
-            c = fgetc (stream);
-        } while (c != '\n' && c != EOF);
-    }
-
 }
 
 int read_int (FILE* const stream, char* const message, int lower, int upper) {
@@ -74,6 +74,7 @@ int read_int (FILE* const stream, char* const message, int lower, int upper) {
     // Input must start with an integer and be within bounds
     } while (error || end == input || output < lower || output > upper);
 
+    free (input);
     return output;
 }
 

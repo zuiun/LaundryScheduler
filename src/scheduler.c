@@ -6,37 +6,59 @@
 #include "scheduler.h"
 
 /*
- * Gets information necessary to produce schedule
+ * Builds laundry specification
+ *
+ * stream: FILE* = Filestream to read
+ *
+ * Pre: stream == stdin || stream > stderr
+ * Post: None
+ * Return: Laundry specification
  */
-information_t* build_information (FILE* const stream) {
+laundry_t* build_laundry (FILE* const stream) {
     assert (stream == stdin || stream > stderr);
 
-    information_t* information = allocate (sizeof (information_t));
+    laundry_t* laundry = allocate (sizeof (laundry_t));
 
-    information->washer_time = read_int (stream, "Washer time (hr)", 1, 24);
-    information->dryer_time = read_int (stream, "Dryer time (hr)", 1, 24);
-    information->number_people = read_int (stream, "Number of people", 1, 10);
-    information->people = allocate (information->number_people * sizeof (person_t));
-    return information;
+    laundry->washer_time = read_int (stream, "Time to wash one load (hr)", 1, 24);
+    laundry->dryer_time = read_int (stream, "Time to dry one load (hr)", 1, 24);
+    laundry->number_people = read_int (stream, "Number of people to schedule", 1, 16);
+    laundry->people = allocate (laundry->number_people * sizeof (person_t));
+    return laundry;
 }
 
+/*
+ * Builds personal situation
+ *
+ * stream: FILE* = Filestream to read
+ *
+ * Pre: stream == stdin || stream > stderr
+ * Post: None
+ * Return: Personal situation
+ */
 person_t* build_person (FILE* const stream) {
     assert (stream == stdin || stream > stderr);
 
     person_t* person = allocate (sizeof (person_t));
-    int day = 0;
 
     person->name = read_string (stream, "Name", 16);
-    person->clothes_remaining = read_int (stream, "Clothes remaining (days)", 1, 7);
-    person->laundry_loads = read_int (stream, "Loads of laundry (hr)", 1, 10);
-    day = read_int (stream, "Day laundry is needed (Monday = 0, ..., Sunday = 6)", 0, 6);
-    person->time_needed = day * 24 + read_int (stream, "Time laundry is needed (hr)", 0, 23);
+    person->clothes_remaining = read_int (stream, "Clothes remaining (days)", 0, 7);
+    person->laundry_loads = read_int (stream, "Loads of laundry to do", 1, 4);
     return person;
 }
 
+/*
+ * Runs laundry scheduler
+ *
+ * argc: int = Number of arguments
+ * argv: char** = Values of arguments
+ *
+ * Pre: None
+ * Post: None
+ * Return: 0 if success, 1 if failure
+ */
 int main (int argc, char** argv) {
     FILE* stream = NULL;
-    information_t* information = NULL;
+    laundry_t* laundry = NULL;
 
     printf ("Laundry Scheduler - ");
 
@@ -48,27 +70,34 @@ int main (int argc, char** argv) {
         return 0;
     } else if (argc == 3 && strcmp (argv [1], "file") == 0) {
         printf ("File Import\n\n");
-        // Replace with file in future
+        // TODO: Open file into stream
         stream = stdin;
     } else {
         printf ("Unknown\nRun with 'help' argument for usage information.\n");
         return 1;
     }
 
-    information = build_information (stream);
+    laundry = build_laundry (stream);
     printf ("\n");
 
-    for (int i = 0; i < information->number_people; i ++) {
+    for (int i = 0; i < laundry->number_people; i ++) {
         printf ("Person %d:\n", i + 1);
-        information->people[i] = build_person (stream);
+        laundry->people[i] = build_person (stream);
         printf ("\n");
     }
 
+    // TODO: Run algorithm
+    // TODO: Print results
+
+    /*
+    // Freeing is unnecessary as program exits
     for (int i = 0; i < information->number_people; i ++) {
         free (information->people[i]->name);
         free (information->people[i]);
     }
 
+    free (information->people);
     free (information);
+    */
     return 0;
 }

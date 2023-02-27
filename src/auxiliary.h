@@ -6,7 +6,7 @@
  * message: char* = Error message
  *
  * Pre: message != NULL
- * Post: Exits program with code 1
+ * Post: Exits program with code 1 (failure)
  * Return: None
  */
 void throw_error (char* const message);
