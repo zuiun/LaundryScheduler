@@ -1,0 +1,17 @@
+{
+    "files.associations": {
+        "stdio.h": "c",
+        "scheduler.h": "c",
+        "auxiliary.h": "c",
+        "array": "c",
+        "deque": "c",
+        "list": "c",
+        "string": "c",
+        "vector": "c",
+        "iterator": "c",
+        "string_view": "c",
+        "cstring": "c",
+        "unordered_map": "c",
+        "initializer_list": "c"
+    }
+}

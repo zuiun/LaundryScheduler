@@ -1,15 +1,16 @@
 CC := gcc
 CFLAGS := -Wall -Wextra
 CFLAGS_EX :=
-CFLAGS_REL := -O3 -g
+CFLAGS_REL := -O3 -g -DNDEBUG
 CFLAGS_DBG := -Og -g3 -fno-omit-frame-pointer
 
 SRC_DIR := ./src
 TESTS_DIR := ./tests
 BLD_DIR := ./build
 
-SRCS := scheduler.c
-HDRS := constants.h
+# Add tester.c when ready
+SRCS := scheduler.c auxiliary.c
+HDRS := scheduler.h auxiliary.h
 OBJS := $(patsubst %.c,%.o,$(foreach SRC,${SRCS},${BLD_DIR}/${SRC}))
 FILES := $(foreach SRC,${SRCS},${SRC_DIR}/${SRC}) $(foreach HDR,${HDRS},${SRC_DIR}/${HDR})
 PROG := scheduler
@@ -17,7 +18,7 @@ PROG := scheduler
 .PHONY: all build release debug check clean
 
 # Default target
-all: clean check print
+all: clean release print
 
 build: ${FILES} directory ${OBJS}
 	${CC} ${CFLAGS} ${CFLAGS_EX} ${OBJS} -o ${BLD_DIR}/${PROG}
@@ -29,7 +30,7 @@ debug: CFLAGS_EX := ${CFLAGS_DBG}
 debug: build
 
 check: release
-	${BLD_DIR}/${PROG} test
+	${BLD_DIR}/${PROG} file
 
 clean:
 	rm -f ${BLD_DIR}/*
