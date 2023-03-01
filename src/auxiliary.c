@@ -26,6 +26,10 @@ void discard_input (FILE* const stream, char* const input) {
             c = fgetc (stream);
         } while (c != '\n' && c != EOF);
     }
+
+    if (stream != stdin) {
+        printf ("\n");
+    }
 }
 
 void throw_error (char* const message) {

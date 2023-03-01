@@ -1,3 +1,6 @@
+// Maximum file path size
+#define PATH_LENGTH 255
+
 /*
  * Personal situation
  *
@@ -16,14 +19,10 @@ typedef struct Person {
 /*
  * Laundry specification
  *
- * washer_time: int = Time to wash one load (hours)
- * dryer_time: int = Time to dry one load (hours)
  * number_people: int = Number to schedule (people)
- * people: person_t** = Personal information for scheduled people
+ * people: person_t** = Personal situation for scheduled people
  */
 typedef struct Laundry {
-    int washer_time;
-    int dryer_time;
     int number_people;
     person_t** people;
 } laundry_t;
