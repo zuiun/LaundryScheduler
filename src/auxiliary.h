@@ -30,7 +30,7 @@ void* allocate (size_t size);
  * lower: int = Lower bound (inclusive) for input
  * upper: int = Upper bound (inclusive) for input
  *
- * Pre: stream == stdin || stream > stderr, message != NULL
+ * Pre: stream == stdin || (stream != stdout && stream != stdin), message != NULL
  * Post: None
  * Return: input integer
  */
@@ -42,7 +42,7 @@ int read_int (FILE* const stream, char* const message, int lower, int upper);
  * message: char* = Prompt message
  * upper: int = Upper bound (inclusive) on number of characters for input
  *
- * Pre: stream == stdin || stream > stderr, message != NULL
+ * Pre: stream == stdin || (stream != stdout && stream != stdin), message != NULL
  * Post: None
  * Return: input string
  */

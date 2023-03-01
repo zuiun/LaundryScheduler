@@ -11,12 +11,12 @@
  * stream: FILE* = Filestream to read
  * input: char* = Filestream input
  *
- * Pre: stream == stdin || stream > stderr
+ * Pre: stream == stdin || (stream != stdout && stream != stdin)
  * Post: None
  * Return: None
  */
 void discard_input (FILE* const stream, char* const input) {
-    assert (stream == stdin || stream > stderr);
+    assert (stream == stdin || (stream != stdout && stream != stdin));
 
     // Check if input does not contain entire line
     if (! strchr (input, '\n')) {
@@ -31,7 +31,7 @@ void discard_input (FILE* const stream, char* const input) {
 void throw_error (char* const message) {
     assert (message != NULL);
 
-    printf ("%s\n", message);
+    printf ("Error: %s\n", message);
     exit (1);
 }
 
@@ -39,14 +39,14 @@ void* allocate (size_t size) {
     void* memory = malloc (size);
 
     if (memory == NULL) {
-        throw_error ("Malloc failed");
+        throw_error ("Memory allocation failed");
     }
 
     return memory;
 }
 
 int read_int (FILE* const stream, char* const message, int lower, int upper) {
-    assert (stream == stdin || stream > stderr);
+    assert (stream == stdin || (stream != stdout && stream != stdin));
     assert (message != NULL);
 
     bool error = false;
@@ -55,9 +55,12 @@ int read_int (FILE* const stream, char* const message, int lower, int upper) {
     int output = 0;
 
     do {
-        // Check if end has been set (by strtol ())
         if (error || end != NULL) {
             printf ("Invalid input.\n");
+
+            if (stream != stdin) {
+                throw_error ("Bad file input");
+            }
         }
 
         printf ("%s [%d - %d]: ", message, lower, upper);
@@ -79,7 +82,7 @@ int read_int (FILE* const stream, char* const message, int lower, int upper) {
 }
 
 char* read_string (FILE* const stream, char* const message, int upper) {
-    assert (stream == stdin || stream > stderr);
+    assert (stream == stdin || (stream != stdout && stream != stdin));
     assert (message != NULL);
 
     bool error = false;
@@ -89,6 +92,10 @@ char* read_string (FILE* const stream, char* const message, int upper) {
     do {
         if (error) {
             printf ("Invalid input.\n");
+
+            if (stream != stdin) {
+                throw_error ("Bad file input");
+            }
         }
 
         printf ("%s: ", message);

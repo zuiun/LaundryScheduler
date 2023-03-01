@@ -10,18 +10,18 @@
  *
  * stream: FILE* = Filestream to read
  *
- * Pre: stream == stdin || stream > stderr
+ * Pre: stream == stdin || (stream != stdout && stream != stdin)
  * Post: None
  * Return: Laundry specification
  */
 laundry_t* build_laundry (FILE* const stream) {
-    assert (stream == stdin || stream > stderr);
+    assert (stream == stdin || (stream != stdout && stream != stdin));
 
     laundry_t* laundry = allocate (sizeof (laundry_t));
 
-    laundry->washer_time = read_int (stream, "Time to wash one load (hr)", 1, 24);
-    laundry->dryer_time = read_int (stream, "Time to dry one load (hr)", 1, 24);
-    laundry->number_people = read_int (stream, "Number of people to schedule", 1, 16);
+    laundry->washer_time = read_int (stream, "Time to wash one load (hours)", 1, 24);
+    laundry->dryer_time = read_int (stream, "Time to dry one load (hours)", 1, 24);
+    laundry->number_people = read_int (stream, "Number to schedule (people)", 1, 16);
     laundry->people = allocate (laundry->number_people * sizeof (person_t));
     return laundry;
 }
@@ -31,18 +31,19 @@ laundry_t* build_laundry (FILE* const stream) {
  *
  * stream: FILE* = Filestream to read
  *
- * Pre: stream == stdin || stream > stderr
+ * Pre: stream == stdin || (stream != stdout && stream != stdin)
  * Post: None
  * Return: Personal situation
  */
 person_t* build_person (FILE* const stream) {
-    assert (stream == stdin || stream > stderr);
+    assert (stream == stdin || (stream != stdout && stream != stdin));
 
     person_t* person = allocate (sizeof (person_t));
 
     person->name = read_string (stream, "Name", 16);
-    person->clothes_remaining = read_int (stream, "Clothes remaining (days)", 0, 7);
-    person->laundry_loads = read_int (stream, "Loads of laundry to do", 1, 4);
+    person->clothes_remaining = read_int (stream, "Amount of clothes remaining (days)", 0, 7);
+    person->laundry_loads = read_int (stream, "Amount of laundry to do (loads)", 1, 4);
+    person->load_time = read_int (stream, "Time to use one washed load (days)", 1, 4);
     return person;
 }
 
@@ -70,8 +71,11 @@ int main (int argc, char** argv) {
         return 0;
     } else if (argc == 3 && strcmp (argv [1], "file") == 0) {
         printf ("File Import\n\n");
-        // TODO: Open file into stream
-        stream = stdin;
+        stream = fopen (argv [2], "r");
+
+        if (stream == NULL) {
+            throw_error ("File open failed");
+        }
     } else {
         printf ("Unknown\nRun with 'help' argument for usage information.\n");
         return 1;
@@ -87,6 +91,11 @@ int main (int argc, char** argv) {
     }
 
     // TODO: Run algorithm
+
+    if (stream != stdin) {
+        fclose (stream);
+    }
+
     // TODO: Print results
 
     /*
