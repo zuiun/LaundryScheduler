@@ -9,7 +9,7 @@
  * Post: Exits program with code 1 (failure)
  * Return: None
  */
-void throw_error (char* const message);
+void throw_error (char const* message);
 /*
  * Allocates memory
  * Wraps malloc () with error handling
@@ -34,7 +34,7 @@ void* allocate (size_t size);
  * Post: None
  * Return: input integer
  */
-int read_int (FILE* const stream, char* const message, int lower, int upper);
+int read_int (FILE const* stream, char const* message, int lower, int upper);
 /*
  * Reads user input (string)
  *
@@ -46,4 +46,4 @@ int read_int (FILE* const stream, char* const message, int lower, int upper);
  * Post: None
  * Return: input string
  */
-char* read_string (FILE* const stream, char* const message, int upper);
+char* read_string (FILE const* stream, char const* message, int upper);

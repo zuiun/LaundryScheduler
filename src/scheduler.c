@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "auxiliary.h"
+#include "priority_queue.h"
 #include "scheduler.h"
 
 /*
@@ -12,15 +13,14 @@
  *
  * Pre: stream == stdin || (stream != stdout && stream != stdin)
  * Post: None
- * Return: Laundry specification
+ * Return: New laundry specification
  */
-laundry_t* build_laundry (FILE* const stream) {
+laundry_t* build_laundry (FILE const* stream) {
     assert (stream == stdin || (stream != stdout && stream != stdin));
 
     laundry_t* laundry = allocate (sizeof (laundry_t));
 
-    laundry->number_people = read_int
-            (stream, "Number to schedule (people)", 1, 16);
+    laundry->number_people = read_int (stream, "Number to schedule (people)", 1, 16);
     laundry->people = allocate (laundry->number_people * sizeof (person_t));
     return laundry;
 }
@@ -32,20 +32,17 @@ laundry_t* build_laundry (FILE* const stream) {
  *
  * Pre: stream == stdin || (stream != stdout && stream != stdin)
  * Post: None
- * Return: Personal situation
+ * Return: New personal situation
  */
-person_t* build_person (FILE* const stream) {
+person_t* build_person (FILE const* stream) {
     assert (stream == stdin || (stream != stdout && stream != stdin));
 
     person_t* person = allocate (sizeof (person_t));
 
     person->name = read_string (stream, "Name", 16);
-    person->clothes_remaining = read_int
-            (stream, "Amount of clothes remaining (days)", 0, 7);
-    person->laundry_loads = read_int
-            (stream, "Amount of laundry to do (loads)", 1, 4);
-    person->load_time = read_int
-            (stream, "Time to use one washed load (days)", 1, 4);
+    person->clothes_remaining = read_int (stream, "Amount of clothes remaining (days)", 0, 7);
+    person->laundry_loads = read_int (stream, "Amount of laundry to do (loads)", 1, 4);
+    person->load_time = read_int (stream, "Time to use one washed load (days)", 1, 4);
     return person;
 }
 
@@ -62,7 +59,9 @@ person_t* build_person (FILE* const stream) {
 int main (int argc, char** argv) {
     FILE* stream = NULL;
     laundry_t* laundry = NULL;
+    pqueue_t* pqueue = NULL;
     char file [PATH_LENGTH];
+    int slots_needed = 0;
 
     printf ("Laundry Scheduler - ");
 
@@ -88,15 +87,27 @@ int main (int argc, char** argv) {
         return 1;
     }
 
+    // Data setup
     laundry = build_laundry (stream);
     printf ("\n");
 
     for (int i = 0; i < laundry->number_people; i ++) {
         printf ("Person %d:\n", i + 1);
         laundry->people [i] = build_person (stream);
+        slots_needed += laundry->people [i]->laundry_loads;
         printf ("\n");
     }
 
+    pqueue = create_pqueue (slots_needed);
+
+    for (int i = 0; i < laundry->number_people; i ++) {
+        pqueue_e_t* element = create_pqueue_e (laundry->people [i], laundry->people [i]->clothes_remaining);
+
+        enqueue (pqueue, element);
+    }
+
+    // Algorithm
+    // TODO: Test priority queue
     // TODO: Run algorithm
 
     // Set output location

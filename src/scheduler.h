@@ -1,3 +1,5 @@
+#include "priority_queue.h"
+
 // Maximum file path size
 #define PATH_LENGTH 255
 
@@ -19,15 +21,15 @@ typedef struct Person {
 /*
  * Laundry specification
  *
- * number_people: int = Number to schedule (people)
  * people: person_t** = Personal situation for scheduled people
+ * number_people: int = Number to schedule (people)
  */
 typedef struct Laundry {
-    int number_people;
     person_t** people;
+    int number_people;
 } laundry_t;
 
 typedef struct Schedule {
+    pqueue_t* pqueue;
     person_t** order;
-    person_t** queue;
 } schedule_t;

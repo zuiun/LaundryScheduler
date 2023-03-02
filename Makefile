@@ -9,8 +9,8 @@ TESTS_DIR := ./tests
 BLD_DIR := ./build
 
 # Add tester.c when ready
-SRCS := scheduler.c auxiliary.c
-HDRS := scheduler.h auxiliary.h
+SRCS := auxiliary.c scheduler.c priority_queue.c
+HDRS := auxiliary.h scheduler.h priority_queue.h
 OBJS := $(patsubst %.c,%.o,$(foreach SRC,${SRCS},${BLD_DIR}/${SRC}))
 FILES := $(foreach SRC,${SRCS},${SRC_DIR}/${SRC}) $(foreach HDR,${HDRS},${SRC_DIR}/${HDR})
 PROG := scheduler
