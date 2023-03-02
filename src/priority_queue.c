@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "auxiliary.h"
 #include "priority_queue.h"
 

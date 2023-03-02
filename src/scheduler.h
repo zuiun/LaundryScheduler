@@ -1,5 +1,3 @@
-#include "priority_queue.h"
-
 // Maximum file path size
 #define PATH_LENGTH 255
 
