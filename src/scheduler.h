@@ -28,8 +28,3 @@ typedef struct Laundry {
     person_t** people;
     int number_people;
 } laundry_t;
-
-typedef struct Schedule {
-    pqueue_t* pqueue;
-    person_t** order;
-} schedule_t;

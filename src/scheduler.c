@@ -59,6 +59,7 @@ person_t* build_person (FILE const* stream) {
 int main (int argc, char** argv) {
     FILE* stream = NULL;
     laundry_t* laundry = NULL;
+    person_t** order = NULL;
     pqueue_t* pqueue = NULL;
     char file [PATH_LENGTH];
     int slots_needed = 0;
@@ -98,17 +99,28 @@ int main (int argc, char** argv) {
         printf ("\n");
     }
 
+    order = allocate (sizeof (person_t*) * slots_needed);
     pqueue = create_pqueue (slots_needed);
 
     for (int i = 0; i < laundry->number_people; i ++) {
-        pqueue_e_t* element = create_pqueue_e (laundry->people [i], laundry->people [i]->clothes_remaining);
-
-        enqueue (pqueue, element);
+        enqueue (pqueue, create_pqueue_e (laundry->people [i], laundry->people [i]->clothes_remaining));
     }
 
+    // TODO: Test priority queue and algorithm
     // Algorithm
-    // TODO: Test priority queue
-    // TODO: Run algorithm
+    for (int i = 0; i < slots_needed; i ++) {
+        pqueue_e_t* element = dequeue (pqueue);
+        person_t* person = element->backing_data;
+
+        order [i] = person;
+        person->laundry_loads --;
+
+        if (person->laundry_loads > 0) {
+            person->clothes_remaining += person->load_time;
+            element->priority = person->clothes_remaining;
+            enqueue (pqueue, element);
+        }
+    }
 
     // Set output location
     if (stream == stdin) {
@@ -127,7 +139,17 @@ int main (int argc, char** argv) {
         stream = fopen (file, "w+");
     }
 
-    // TODO: Print results
+    // Print order
+    printf ("Order:\n");
+
+    for (int i = 0; i < slots_needed; i ++) {
+        fprintf (stream, "%s\n", order [i]->name);
+    }
+
+    if (stream != stdin) {
+        printf ("Output in %s\n", file);
+        fclose (stream);
+    }
 
     // Freeing is unnecessary as program exits
     for (int i = 0; i < laundry->number_people; i ++) {
