@@ -15,16 +15,16 @@
  * Post: None
  * Return: None
  */
-void discard_input (FILE const* stream, char const* input) {
+void discard_input (FILE* const stream, char* const input) {
     assert (stream == stdin || (stream != stdout && stream != stdin));
 
     // Check if input does not contain entire line
     if (! strchr (input, '\n')) {
-        char c = '\0';
+        char temporary = '\0';
 
         do {
-            c = fgetc (stream);
-        } while (c != '\n' && c != EOF);
+            temporary = fgetc (stream);
+        } while (temporary != '\n' && temporary != EOF);
     }
 
     if (stream != stdin) {
@@ -32,7 +32,7 @@ void discard_input (FILE const* stream, char const* input) {
     }
 }
 
-void throw_error (char const* message) {
+void throw_error (char* const message) {
     assert (message != NULL);
 
     printf ("Error: %s\n", message);
@@ -49,7 +49,7 @@ void* allocate (size_t size) {
     return memory;
 }
 
-int read_int (FILE const* stream, char const* message, int lower, int upper) {
+int read_int (FILE* const stream, char* const message, int lower, int upper) {
     assert (stream == stdin || (stream != stdout && stream != stdin));
     assert (message != NULL);
 
@@ -85,7 +85,7 @@ int read_int (FILE const* stream, char const* message, int lower, int upper) {
     return output;
 }
 
-char* read_string (FILE const* stream, char const* message, int upper) {
+char* read_string (FILE* const stream, char* const message, int upper) {
     assert (stream == stdin || (stream != stdout && stream != stdin));
     assert (message != NULL);
 

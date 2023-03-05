@@ -38,7 +38,7 @@ void heapify_up (pqueue_t* pqueue, int index) {
     assert (pqueue != NULL);
     assert (0 <= index && index < pqueue->size);
 
-    if (pqueue->elements [index]->priority < pqueue->elements [parent(index)]->priority) {
+    if (parent(index) >= 0 && pqueue->elements [index]->priority < pqueue->elements [parent(index)]->priority) {
         swap (pqueue, index, parent(index));
         heapify_up (pqueue, parent(index));
     }
@@ -60,11 +60,11 @@ void heapify_down (pqueue_t* pqueue, int index) {
 
     int smallest = index;
 
-    if (pqueue->elements[left_child(index)] != NULL && pqueue->elements[left_child(index)]->priority < pqueue->elements[smallest]->priority) {
+    if (left_child(index) < pqueue->size && pqueue->elements[left_child(index)] != NULL && pqueue->elements[left_child(index)]->priority < pqueue->elements[smallest]->priority) {
         smallest = left_child(index);
     }
 
-    if (pqueue->elements[right_child(index)] != NULL && pqueue->elements[right_child(index)]->priority < pqueue->elements[smallest]->priority) {
+    if (right_child(index) < pqueue->size && pqueue->elements[right_child(index)] != NULL && pqueue->elements[right_child(index)]->priority < pqueue->elements[smallest]->priority) {
         smallest = right_child(index);
     }
 
@@ -82,11 +82,10 @@ pqueue_t* create_pqueue (int max_elements) {
     pqueue->elements = allocate (sizeof (pqueue_e_t*) * max_elements);
     pqueue->max_elements = max_elements;
     pqueue->size = 0;
-    memset (pqueue->elements, NULL, sizeof (pqueue_e_t*) * max_elements);
     return pqueue;
 }
 
-pqueue_e_t* create_pqueue_e (void const* backing_data, int priority) {
+pqueue_e_t* create_pqueue_e (void* backing_data, int priority) {
     assert (backing_data != NULL);
 
     pqueue_e_t* element = allocate (sizeof (pqueue_e_t));
@@ -96,7 +95,7 @@ pqueue_e_t* create_pqueue_e (void const* backing_data, int priority) {
     return element;
 }
 
-void enqueue (pqueue_t* pqueue, pqueue_e_t const* element) {
+void enqueue (pqueue_t* pqueue, pqueue_e_t* element) {
     assert (pqueue != NULL);
     assert (element != NULL);
 
@@ -122,10 +121,14 @@ pqueue_e_t* dequeue (pqueue_t* pqueue) {
     } else {
         element = pqueue->elements [0];
         pqueue->size --;
-        index = pqueue->size;
-        swap (pqueue, 0, index);
+
+        if (pqueue->size > 1) {
+            index = pqueue->size;
+            swap (pqueue, 0, index);
+            heapify_down (pqueue, 0);
+        }
+
         pqueue->elements [index] = NULL;
-        heapify_down (pqueue, 0);
     }
 
     return element;

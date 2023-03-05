@@ -15,7 +15,7 @@
  * Post: None
  * Return: New laundry specification
  */
-laundry_t* build_laundry (FILE const* stream) {
+laundry_t* build_laundry (FILE* const stream) {
     assert (stream == stdin || (stream != stdout && stream != stdin));
 
     laundry_t* laundry = allocate (sizeof (laundry_t));
@@ -34,7 +34,7 @@ laundry_t* build_laundry (FILE const* stream) {
  * Post: None
  * Return: New personal situation
  */
-person_t* build_person (FILE const* stream) {
+person_t* build_person (FILE* const stream) {
     assert (stream == stdin || (stream != stdout && stream != stdin));
 
     person_t* person = allocate (sizeof (person_t));
@@ -119,6 +119,8 @@ int main (int argc, char** argv) {
             person->clothes_remaining += person->load_time;
             element->priority = person->clothes_remaining;
             enqueue (pqueue, element);
+        } else {
+            free (element);
         }
     }
 
@@ -146,7 +148,7 @@ int main (int argc, char** argv) {
         fprintf (stream, "%s\n", order [i]->name);
     }
 
-    if (stream != stdin) {
+    if (stream != stdout) {
         printf ("Output in %s\n", file);
         fclose (stream);
     }
@@ -159,5 +161,8 @@ int main (int argc, char** argv) {
 
     free (laundry->people);
     free (laundry);
+    free (pqueue->elements);
+    free (pqueue);
+    free (order);
     return 0;
 }

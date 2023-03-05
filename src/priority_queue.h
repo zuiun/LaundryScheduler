@@ -46,7 +46,7 @@ pqueue_t* create_pqueue (int max_elements);
  * Post: None
  * Return: New priority queue element
  */
-pqueue_e_t* create_pqueue_e (void const* backing_data, int priority);
+pqueue_e_t* create_pqueue_e (void* backing_data, int priority);
 /*
  * Adds an element to priority queue
  *
@@ -57,7 +57,7 @@ pqueue_e_t* create_pqueue_e (void const* backing_data, int priority);
  * Post: Element is added to priority queue if there is space
  * Return: None
  */
-void enqueue (pqueue_t* pqueue, pqueue_e_t const* element);
+void enqueue (pqueue_t* pqueue, pqueue_e_t* element);
 /*
  * Removes smallest element from priority queue
  *
