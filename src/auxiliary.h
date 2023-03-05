@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 
 /*
@@ -30,7 +31,7 @@ void* allocate (size_t size);
  * lower: int = Lower bound (inclusive) for input
  * upper: int = Upper bound (inclusive) for input
  *
- * Pre: stream == stdin || (stream != stdout && stream != stdin), message != NULL
+ * Pre: stream == stdin || ! is_standard_stream (stream), message != NULL
  * Post: None
  * Return: input integer
  */
@@ -42,8 +43,18 @@ int read_int (FILE* const stream, char* const message, int lower, int upper);
  * message: char* = Prompt message
  * upper: int = Upper bound (inclusive) on number of characters for input
  *
- * Pre: stream == stdin || (stream != stdout && stream != stdin), message != NULL
+ * Pre: stream == stdin || ! is_standard_stream (stream), message != NULL
  * Post: None
  * Return: input string
  */
 char* read_string (FILE* const stream, char* const message, int upper);
+/*
+ * Checks if filestream is standard (stdin, stdout, stderr)
+ *
+ * stream: FILE* = Filestream to check
+ *
+ * Pre: stream != NULL
+ * Post: None
+ * Return: true if filestream is standard, false otherwise
+ */
+bool is_standard_stream (FILE* const stream);

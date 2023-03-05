@@ -7,35 +7,59 @@
 #include "scheduler.h"
 
 /*
- * Builds laundry specification
+ * Handles command line arguments
+ * Exits program if there is nothing to handle
  *
- * stream: FILE* = Filestream to read
+ * argc: int = Number of arguments
+ * argv: char** = Values of arguments
  *
- * Pre: stream == stdin || (stream != stdout && stream != stdin)
+ * Pre: argc > 0, argv != NULL
  * Post: None
- * Return: New laundry specification
+ * Return: Input filestream to open
  */
-laundry_t* build_laundry (FILE* const stream) {
-    assert (stream == stdin || (stream != stdout && stream != stdin));
+FILE* handle_arguments (int argc, char** const argv) {
+    assert (argc > 0);
+    assert (argv != NULL);
 
-    laundry_t* laundry = allocate (sizeof (laundry_t));
+    FILE* stream = NULL;
 
-    laundry->number_people = read_int (stream, "Number to schedule (people)", 1, 16);
-    laundry->people = allocate (laundry->number_people * sizeof (person_t));
-    return laundry;
+    printf ("Laundry Scheduler - ");
+
+    if (argc == 1) {
+        printf ("Command Line\n\n");
+        stream = stdin;
+    } else if (argc == 2 && strcmp (argv [1], "help") == 0) {
+        printf ("Help\n\nUsage: scheduler [help] [file <path to .txt>]\n\n");
+        printf ("No arguments: Runs scheduler in command line\n");
+        printf ("help: Displays this message\n");
+        printf ("file: Runs scheduler on given .txt file\n");
+        exit (0);
+    } else if (argc == 3 && strcmp (argv [1], "file") == 0) {
+        printf ("File Import\n\n");
+        stream = fopen (argv [2], "r");
+
+        if (stream == NULL) {
+            throw_error ("File open failed");
+        }
+    } else {
+        printf ("Unknown Argument\n\nRun with 'help' argument for usage information\n");
+        exit (0);
+    }
+
+    return stream;
 }
 
 /*
  * Builds personal situation
  *
- * stream: FILE* = Filestream to read
+ * stream: FILE* = Input filestream
  *
- * Pre: stream == stdin || (stream != stdout && stream != stdin)
+ * Pre: stream == stdin || ! is_standard_stream (stream)
  * Post: None
  * Return: New personal situation
  */
 person_t* build_person (FILE* const stream) {
-    assert (stream == stdin || (stream != stdout && stream != stdin));
+    assert (stream == stdin || ! is_standard_stream (stream));
 
     person_t* person = allocate (sizeof (person_t));
 
@@ -44,6 +68,132 @@ person_t* build_person (FILE* const stream) {
     person->laundry_loads = read_int (stream, "Amount of laundry to do (loads)", 1, 4);
     person->load_time = read_int (stream, "Time to use one washed load (days)", 1, 4);
     return person;
+}
+
+/*
+ * Builds laundry specification
+ *
+ * stream: FILE* = Input filestream
+ *
+ * Pre: stream == stdin || ! is_standard_stream (stream)
+ * Post: None
+ * Return: New laundry specification
+ */
+laundry_t* build_laundry (FILE* const stream) {
+    assert (stream == stdin || ! is_standard_stream (stream));
+
+    laundry_t* laundry = allocate (sizeof (laundry_t));
+
+    laundry->number_people = read_int (stream, "Number to schedule (people)", 1, 16);
+    laundry->people = allocate (laundry->number_people * sizeof (person_t));
+    printf ("\n");
+
+    for (int i = 0; i < laundry->number_people; i ++) {
+        printf ("Person %d:\n", i + 1);
+        laundry->people [i] = build_person (stream);
+        printf ("\n");
+    }
+
+    return laundry;
+}
+
+/*
+ * Chooses output filestream to open
+ *
+ * input: FILE* = Input filestream
+ * path: char* = Input file path
+ *
+ * Pre: input == stdin || (! is_standard_stream (stream) && path != NULL)
+ * Post: None
+ * Return: Output filestream to open
+ */
+FILE* choose_output (FILE* const input, char* const path) {
+    assert (input == stdin || (! is_standard_stream (input) && path != NULL));
+
+    FILE* output = NULL;
+
+    if (input == stdin) {
+        output = stdout;
+        printf ("Order:\n");
+    } else {
+        // Convert input file extension to output file extension
+        char* file = strdup (path);
+        char* extension = strstr (file, ".tst");
+
+        fclose (input);
+
+        if (file == NULL || extension == NULL) {
+            throw_error ("Extension replacement failed");
+        }
+
+        extension [1] = 'o'; // t
+        extension [2] = 'u'; // s
+        output = fopen (file, "w+");
+        printf ("Order in %s\n", file);
+        free (file);
+    }
+
+    return output;
+}
+
+/*
+ * Runs scheduling algorithm
+ *
+ * stream: FILE* = Output filestream
+ *
+ * Pre: stream == stdout || ! is_standard_stream (stream), pqueue != NULL
+ * Post: None
+ * Return: None
+ */
+void run_algorithm (FILE* const stream, pqueue_t* pqueue) {
+    assert (stream == stdout || ! is_standard_stream (stream));
+    assert (pqueue != NULL);
+
+    while (pqueue->size > 0) {
+        pqueue_e_t* element = dequeue (pqueue);
+        person_t* person = element->data;
+
+        fprintf (stream, "%s\n", person->name);
+        person->laundry_loads --;
+
+        if (person->laundry_loads > 0) {
+            person->clothes_remaining += person->load_time;
+            element->priority = person->clothes_remaining;
+            enqueue (pqueue, element);
+        } else {
+            free_pqueue_e (element);
+        }
+    }
+}
+
+/*
+ * Cleans up filestream and data structures
+ *
+ * stream: FILE* = Output filestream 
+ * laundry: laundry_t* = Laundry specification
+ * pqueue: pqueue_t* = Priority queue
+ *
+ * Pre: stream == stdout || ! is_standard_stream (stream), laundry != NULL, pqueue != NULL
+ * Post: stream is closed if it is a file, laundry and pqueue are freed
+ * Return: None
+ */
+void cleanup (FILE* const stream, laundry_t* laundry, pqueue_t* pqueue) {
+    assert (stream == stdout || ! is_standard_stream (stream));
+    assert (laundry != NULL);
+    assert (pqueue != NULL);
+
+    if (stream != stdout) {
+        fclose (stream);
+    }
+
+    for (int i = 0; i < laundry->number_people; i ++) {
+        free (laundry->people [i]->name);
+        free (laundry->people [i]);
+    }
+
+    free (laundry->people);
+    free (laundry);
+    free_pqueue (pqueue);
 }
 
 /*
@@ -57,112 +207,19 @@ person_t* build_person (FILE* const stream) {
  * Return: 0 if success, 1 if failure
  */
 int main (int argc, char** argv) {
-    FILE* stream = NULL;
-    laundry_t* laundry = NULL;
-    person_t** order = NULL;
-    pqueue_t* pqueue = NULL;
-    char file [PATH_LENGTH];
-    int slots_needed = 0;
-
-    printf ("Laundry Scheduler - ");
-
-    if (argc == 1) {
-        printf ("Command Line\n\n");
-        stream = stdin;
-    } else if (argc == 2 && strcmp (argv [1], "help") == 0) {
-        printf ("Help\n\nUsage: scheduler [help] [file <path to .txt>]\n\n");
-        printf ("No arguments: Runs scheduler in command line\n");
-        printf ("help: Displays this message\n");
-        printf ("file: Runs scheduler on given .txt file\n");
-        return 0;
-    } else if (argc == 3 && strcmp (argv [1], "file") == 0) {
-        printf ("File Import\n\n");
-        strcpy (file, argv [2]);
-        stream = fopen (file, "r");
-
-        if (stream == NULL) {
-            throw_error ("File open failed");
-        }
-    } else {
-        printf ("Unknown\n\nRun with 'help' argument for usage information\n");
-        return 1;
-    }
-
-    // Data setup
-    laundry = build_laundry (stream);
-    printf ("\n");
-
-    for (int i = 0; i < laundry->number_people; i ++) {
-        printf ("Person %d:\n", i + 1);
-        laundry->people [i] = build_person (stream);
-        slots_needed += laundry->people [i]->laundry_loads;
-        printf ("\n");
-    }
-
-    order = allocate (sizeof (person_t*) * slots_needed);
-    pqueue = create_pqueue (slots_needed);
+    FILE* stream = handle_arguments (argc, argv);
+    laundry_t* laundry = build_laundry (stream);
+    pqueue_t* pqueue = create_pqueue (laundry->number_people);
 
     for (int i = 0; i < laundry->number_people; i ++) {
         enqueue (pqueue, create_pqueue_e (laundry->people [i], laundry->people [i]->clothes_remaining));
     }
 
-    // TODO: Test priority queue and algorithm
-    // Algorithm
-    for (int i = 0; i < slots_needed; i ++) {
-        pqueue_e_t* element = dequeue (pqueue);
-        person_t* person = element->backing_data;
-
-        order [i] = person;
-        person->laundry_loads --;
-
-        if (person->laundry_loads > 0) {
-            person->clothes_remaining += person->load_time;
-            element->priority = person->clothes_remaining;
-            enqueue (pqueue, element);
-        } else {
-            free (element);
-        }
-    }
-
-    // Set output location
-    if (stream == stdin) {
-        stream = stdout;
-    } else {
-        fclose (stream);
-        // Replace extension of input filename to get output filename
-        char* extension = strstr (file, ".txt");
-
-        if (extension == NULL) {
-            throw_error ("Extension replacement failed");
-        }
-
-        *extension = '\0';
-        strcat (file, "_output.txt");
-        stream = fopen (file, "w+");
-    }
-
-    // Print order
-    printf ("Order:\n");
-
-    for (int i = 0; i < slots_needed; i ++) {
-        fprintf (stream, "%s\n", order [i]->name);
-    }
-
-    if (stream != stdout) {
-        printf ("Output in %s\n", file);
-        fclose (stream);
-    }
-
-    // Freeing is unnecessary as program exits
-    for (int i = 0; i < laundry->number_people; i ++) {
-        free (laundry->people [i]->name);
-        free (laundry->people [i]);
-    }
-
-    free (laundry->people);
-    free (laundry);
-    free (pqueue->elements);
-    free (pqueue);
-    free (order);
+    // Unsafe pointer math, but argv [2] will not be accessed if it does not exist
+    stream = choose_output (stream, argv [2]);
+    // TODO: Needs testing
+    // TODO: Crashes on more than one person
+    run_algorithm (stream, pqueue);
+    cleanup (stream, laundry, pqueue);
     return 0;
 }

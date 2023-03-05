@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdlib.h>
 #include "auxiliary.h"
 #include "priority_queue.h"
 
@@ -85,17 +86,17 @@ pqueue_t* create_pqueue (int max_elements) {
     return pqueue;
 }
 
-pqueue_e_t* create_pqueue_e (void* backing_data, int priority) {
-    assert (backing_data != NULL);
+pqueue_e_t* create_pqueue_e (void* const data, int priority) {
+    assert (data != NULL);
 
     pqueue_e_t* element = allocate (sizeof (pqueue_e_t));
 
-    element->backing_data = backing_data;
+    element->data = data;
     element->priority = priority;
     return element;
 }
 
-void enqueue (pqueue_t* pqueue, pqueue_e_t* element) {
+void enqueue (pqueue_t* pqueue, pqueue_e_t* const element) {
     assert (pqueue != NULL);
     assert (element != NULL);
 
@@ -132,4 +133,20 @@ pqueue_e_t* dequeue (pqueue_t* pqueue) {
     }
 
     return element;
+}
+
+void free_pqueue (pqueue_t* pqueue) {
+    assert (pqueue != NULL);
+
+    free (pqueue->elements);
+    free (pqueue);
+}
+
+void* free_pqueue_e (pqueue_e_t* element) {
+    assert (element != NULL);
+
+    void* data = element->data;
+
+    free (element);
+    return data;
 }

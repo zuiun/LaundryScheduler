@@ -5,11 +5,11 @@
 /*
  * Priority queue element
  *
- * backing_data: void* = Data of element
- * priority: int = Priority of element
+ * data: void* = Element data
+ * priority: int = Element priority
  */
 typedef struct PriorityQueueElement {
-    void* backing_data;
+    void* data;
     int priority;
 } pqueue_e_t;
 
@@ -39,14 +39,14 @@ pqueue_t* create_pqueue (int max_elements);
 /*
  * Creates a priority queue element
  *
- * backing_data: void* = Data of element
- * priority: int = Priority of element
+ * data: void* = Element data
+ * priority: int = Element priority
  *
- * Pre: backing_data != NULL
+ * Pre: data != NULL
  * Post: None
  * Return: New priority queue element
  */
-pqueue_e_t* create_pqueue_e (void* backing_data, int priority);
+pqueue_e_t* create_pqueue_e (void* const data, int priority);
 /*
  * Adds an element to priority queue
  *
@@ -57,7 +57,7 @@ pqueue_e_t* create_pqueue_e (void* backing_data, int priority);
  * Post: Element is added to priority queue if there is space
  * Return: None
  */
-void enqueue (pqueue_t* pqueue, pqueue_e_t* element);
+void enqueue (pqueue_t* pqueue, pqueue_e_t* const element);
 /*
  * Removes smallest element from priority queue
  *
@@ -68,3 +68,25 @@ void enqueue (pqueue_t* pqueue, pqueue_e_t* element);
  * Return: Smallest element
  */
 pqueue_e_t* dequeue (pqueue_t* pqueue);
+/*
+ * Frees priority queue
+ * It is the user's responsibility to free individual elements
+ *
+ * pqueue: pqueue_t* = Priority queue
+ *
+ * Pre: pqueue != NULL
+ * Post: pqueue and pqueue->elements are freed
+ * Return: None
+ */
+void free_pqueue (pqueue_t* pqueue);
+/*
+ * Frees priority queue element
+ * It is the user's responsibility to free element data
+ *
+ * element: pqueue_e_t* = Priority queue element
+ *
+ * Pre: element != NULL
+ * Post: element is freed
+ * Return: Element data
+ */
+void* free_pqueue_e (pqueue_e_t* element);

@@ -5,18 +5,24 @@
 #include <string.h>
 #include "auxiliary.h"
 
+bool is_standard_stream (FILE* const stream) {
+    assert (stream != NULL);
+
+    return stream == stdin || stream == stdout || stream == stderr;
+}
+
 /*
  * Discards extra input in filestream
  *
  * stream: FILE* = Filestream to read
  * input: char* = Filestream input
  *
- * Pre: stream == stdin || (stream != stdout && stream != stdin)
+ * Pre: stream == stdin || ! is_standard_stream (stream)
  * Post: None
  * Return: None
  */
 void discard_input (FILE* const stream, char* const input) {
-    assert (stream == stdin || (stream != stdout && stream != stdin));
+    assert (stream == stdin || ! is_standard_stream (stream));
 
     // Check if input does not contain entire line
     if (! strchr (input, '\n')) {
@@ -50,7 +56,7 @@ void* allocate (size_t size) {
 }
 
 int read_int (FILE* const stream, char* const message, int lower, int upper) {
-    assert (stream == stdin || (stream != stdout && stream != stdin));
+    assert (stream == stdin || ! is_standard_stream (stream));
     assert (message != NULL);
 
     bool error = false;
@@ -86,7 +92,7 @@ int read_int (FILE* const stream, char* const message, int lower, int upper) {
 }
 
 char* read_string (FILE* const stream, char* const message, int upper) {
-    assert (stream == stdin || (stream != stdout && stream != stdin));
+    assert (stream == stdin || ! is_standard_stream (stream));
     assert (message != NULL);
 
     bool error = false;

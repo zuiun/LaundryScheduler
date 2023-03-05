@@ -1,6 +1,3 @@
-// Maximum file path size
-#define PATH_LENGTH 255
-
 /*
  * Personal situation
  *
