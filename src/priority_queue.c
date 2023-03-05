@@ -119,17 +119,17 @@ pqueue_e_t* dequeue (pqueue_t* pqueue) {
 
     if (pqueue->size == 0) {
         printf ("Cannot dequeue from empty priority queue\n");
+    } else if (pqueue->size == 1) {
+        element = pqueue->elements [0];
+        pqueue->elements [0] = NULL;
+        pqueue->size --;
     } else {
         element = pqueue->elements [0];
-        pqueue->size --;
-
-        if (pqueue->size > 1) {
-            index = pqueue->size;
-            swap (pqueue, 0, index);
-            heapify_down (pqueue, 0);
-        }
-
+        index = pqueue->size - 1;
+        swap (pqueue, 0, index);
         pqueue->elements [index] = NULL;
+        pqueue->size --;
+        heapify_down (pqueue, 0);
     }
 
     return element;

@@ -2,7 +2,7 @@ CC := gcc
 CFLAGS := -Wall -Wextra
 CFLAGS_EX :=
 CFLAGS_REL := -O3 -g -DNDEBUG
-CFLAGS_DBG := -Og -g3 -fno-omit-frame-pointer
+CFLAGS_DBG := -g3 -fno-omit-frame-pointer
 
 SRC_DIR := ./src
 TESTS_DIR := ./tests
@@ -18,16 +18,16 @@ PROG := scheduler
 .PHONY: all build release debug check clean
 
 # Default target
-all: clean release print
+all: release print
 
 build: ${FILES} directory ${OBJS}
-	${CC} ${CFLAGS} ${CFLAGS_EX} ${OBJS} -o ${BLD_DIR}/${PROG}
+	${CC} ${CFLAGS} ${OBJS} -o ${BLD_DIR}/${PROG}
 
 release: CFLAGS_EX := ${CFLAGS_REL}
-release: build
+release: clean build
 
 debug: CFLAGS_EX := ${CFLAGS_DBG}
-debug: build
+debug: clean build
 
 check: release
 	${BLD_DIR}/${PROG} file
@@ -42,4 +42,4 @@ print:
 	@echo ${FILES} ${OBJS}
 
 ${BLD_DIR}/%.o: ${SRC_DIR}/%.c
-	${CC} -c ${CFLAGS} $< -o $@
+	${CC} -c ${CFLAGS} ${CFLAGS_EX} $< -o $@
