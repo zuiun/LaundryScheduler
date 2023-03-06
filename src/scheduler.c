@@ -116,18 +116,12 @@ FILE* choose_output (FILE* const input, char* const path) {
         output = stdout;
         printf ("Order:\n");
     } else {
-        // Convert input file extension to output file extension
-        char* file = strdup (path);
-        char* extension = strstr (file, ".tst");
+        // Convert input file to output file
+        char* file = allocate (strlen (path) + 1);
 
         fclose (input);
-
-        if (file == NULL || extension == NULL) {
-            throw_error ("Extension replacement failed");
-        }
-
-        extension [1] = 'o'; // t
-        extension [2] = 'u'; // s
+        strcpy (file, path);
+        replace_string (file, ".tst", ".out");
         output = fopen (file, "w+");
         printf ("Order in %s\n", file);
         free (file);
@@ -218,7 +212,6 @@ int main (int argc, char** argv) {
     // Unsafe pointer math, but argv [2] will not be accessed if it does not exist
     stream = choose_output (stream, argv [2]);
     // TODO: Needs testing
-    // TODO: Crashes on more than one person
     run_algorithm (stream, pqueue);
     cleanup (stream, laundry, pqueue);
     return 0;

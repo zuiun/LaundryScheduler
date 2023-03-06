@@ -58,3 +58,15 @@ char* read_string (FILE* const stream, char* const message, int upper);
  * Return: true if filestream is standard, false otherwise
  */
 bool is_standard_stream (FILE* const stream);
+/*
+ * Replaces first occurrence of pattern in string
+ *
+ * string: char* = String to check
+ * pattern: char* = Pattern to find
+ * replacement: char* = Replacement for pattern
+ *
+ * Pre: string != NULL, pattern != NULL, replacement != NULL, strlen (pattern) == strlen (replacement)
+ * Post: None
+ * Return: None
+ */
+void replace_string (char* string, char* const pattern, char* const replacement);

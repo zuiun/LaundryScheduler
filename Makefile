@@ -8,11 +8,11 @@ SRC_DIR := ./src
 TESTS_DIR := ./tests
 BLD_DIR := ./build
 
-# Add tester.c when ready
-SRCS := auxiliary.c scheduler.c priority_queue.c
-HDRS := auxiliary.h scheduler.h priority_queue.h
-OBJS := $(patsubst %.c,%.o,$(foreach SRC,${SRCS},${BLD_DIR}/${SRC}))
-FILES := $(foreach SRC,${SRCS},${SRC_DIR}/${SRC}) $(foreach HDR,${HDRS},${SRC_DIR}/${HDR})
+SRCS := $(wildcard ${SRC_DIR}/*.c)
+HDRS := $(wildcard ${SRC_DIR}/*.h)
+OUTS := $(patsubst %.tst,%.out,$(wildcard ${TESTS_DIR}/*.tst))
+OBJS := $(patsubst ${SRC_DIR}/%.c,${BLD_DIR}/%.o,${SRCS})
+FILES := ${SRCS} ${HDRS}
 PROG := scheduler
 
 .PHONY: all build release debug check clean
@@ -29,17 +29,22 @@ release: clean build
 debug: CFLAGS_EX := ${CFLAGS_DBG}
 debug: clean build
 
-check: release
-	${BLD_DIR}/${PROG} file
+check: release ${OUTS}
 
 clean:
 	rm -f ${BLD_DIR}/*
+	rm -f ${TESTS_DIR}/*.out
 
 directory:
 	mkdir -p ${BLD_DIR}
 
 print:
-	@echo ${FILES} ${OBJS}
+	@echo ${FILES} ${OBJS} ${OUTS}
 
 ${BLD_DIR}/%.o: ${SRC_DIR}/%.c
 	${CC} -c ${CFLAGS} ${CFLAGS_EX} $< -o $@
+
+${TESTS_DIR}/%.out:
+	@echo
+	${BLD_DIR}/${PROG} file $(patsubst %.out,%.tst,$@) > /dev/null
+	-cmp $@ $(patsubst %.out,%.chk,$@)

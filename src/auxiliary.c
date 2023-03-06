@@ -15,27 +15,19 @@ bool is_standard_stream (FILE* const stream) {
  * Discards extra input in filestream
  *
  * stream: FILE* = Filestream to read
- * input: char* = Filestream input
  *
  * Pre: stream == stdin || ! is_standard_stream (stream)
  * Post: None
  * Return: None
  */
-void discard_input (FILE* const stream, char* const input) {
+void discard_input (FILE* const stream) {
     assert (stream == stdin || ! is_standard_stream (stream));
 
-    // Check if input does not contain entire line
-    if (! strchr (input, '\n')) {
-        char temporary = '\0';
+    char temporary = '\0';
 
-        do {
-            temporary = fgetc (stream);
-        } while (temporary != '\n' && temporary != EOF);
-    }
-
-    if (stream != stdin) {
-        printf ("\n");
-    }
+    do {
+        temporary = fgetc (stream);
+    } while (temporary != '\n' && temporary != EOF);
 }
 
 void throw_error (char* const message) {
@@ -59,9 +51,9 @@ int read_int (FILE* const stream, char* const message, int lower, int upper) {
     assert (stream == stdin || ! is_standard_stream (stream));
     assert (message != NULL);
 
-    bool error = false;
     char* input = allocate (sizeof (int) + 1);
     char* end = NULL;
+    bool error = false;
     int output = 0;
 
     do {
@@ -75,7 +67,7 @@ int read_int (FILE* const stream, char* const message, int lower, int upper) {
 
         printf ("%s [%d - %d]: ", message, lower, upper);
 
-        if (fgets (input, sizeof (input), stream) == NULL) {
+        if (fgets (input, sizeof (int) + 1, stream) == NULL) {
             error = true;
         } else {
             error = false;
@@ -83,7 +75,13 @@ int read_int (FILE* const stream, char* const message, int lower, int upper) {
             output = strtol (input, &end, 10);
         }
 
-        discard_input (stream, input);
+        if (! strchr (input, '\n')) {
+            discard_input (stream);
+        }
+
+        if (stream != stdin) {
+            printf ("%d\n", output);
+        }
     // Input must start with an integer and be within bounds
     } while (error || end == input || output < lower || output > upper);
 
@@ -95,9 +93,9 @@ char* read_string (FILE* const stream, char* const message, int upper) {
     assert (stream == stdin || ! is_standard_stream (stream));
     assert (message != NULL);
 
-    bool error = false;
     char* input = allocate (upper + 1);
     char* newline = NULL;
+    bool error = false;
 
     do {
         if (error) {
@@ -110,14 +108,17 @@ char* read_string (FILE* const stream, char* const message, int upper) {
 
         printf ("%s: ", message);
 
-        if (fgets (input, sizeof (input), stream) == NULL) {
+        if (fgets (input, sizeof (upper + 1), stream) == NULL) {
             error = true;
         } else {
             error = false;
         }
     } while (error);
 
-    discard_input (stream, input);
+    if (! strchr (input, '\n')) {
+        discard_input (stream);
+    }
+
     newline = strchr (input, '\n');
 
     // Remove newline
@@ -125,5 +126,26 @@ char* read_string (FILE* const stream, char* const message, int upper) {
         *newline = '\0';
     }
 
+    if (stream != stdin) {
+        printf ("%s\n", input);
+    }
+
     return input;
+}
+
+void replace_string (char* string, char* const pattern, char* const replacement) {
+    assert (string != NULL);
+    assert (pattern != NULL);
+    assert (replacement != NULL);
+    assert (strlen (pattern) == strlen (replacement));
+
+    char* location = strstr (string, pattern);
+
+    if (location == NULL) {
+        printf ("Pattern '%s' not found in '%s'\n", pattern, string);
+    } else {
+        for (unsigned int i = 0; i < strlen (pattern); i ++) {
+            location [i] = replacement [i];
+        }
+    }
 }
