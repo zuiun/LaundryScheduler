@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "auxiliary.h"
 #include "priority_queue.h"
 #include "scheduler.h"
+#include "utilities.h"
 
 /*
  * Handles command line arguments

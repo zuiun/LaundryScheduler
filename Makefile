@@ -8,19 +8,20 @@ SRC_DIR := ./src
 TESTS_DIR := ./tests
 BLD_DIR := ./build
 
-SRCS := $(wildcard ${SRC_DIR}/*.c)
-HDRS := $(wildcard ${SRC_DIR}/*.h)
-OUTS := $(patsubst %.tst,%.out,$(wildcard ${TESTS_DIR}/*.tst))
+FILES := priority_queue scheduler utilities
+TESTS := 1 2 3 4 5
+HDRS := $(foreach FILE,${FILES},${SRC_DIR}/${FILE}.h)
+SRCS := $(patsubst %.h,%.c,${HDRS})
+OUTS := $(foreach TEST,${TESTS},${TESTS_DIR}/test${TEST}.out)
 OBJS := $(patsubst ${SRC_DIR}/%.c,${BLD_DIR}/%.o,${SRCS})
-FILES := ${SRCS} ${HDRS}
 PROG := scheduler
 
-.PHONY: all build release debug check clean
+.PHONY: all build release debug check clean directory print
 
 # Default target
 all: release print
 
-build: ${FILES} directory ${OBJS}
+build: ${HDRS} ${SRCS} directory ${OBJS}
 	${CC} ${CFLAGS} ${OBJS} -o ${BLD_DIR}/${PROG}
 
 release: CFLAGS_EX := ${CFLAGS_REL}
@@ -39,7 +40,7 @@ directory:
 	mkdir -p ${BLD_DIR}
 
 print:
-	@echo ${FILES} ${OBJS} ${OUTS}
+	@echo ${HDRS} ${SRCS} ${OBJS} ${OUTS}
 
 ${BLD_DIR}/%.o: ${SRC_DIR}/%.c
 	${CC} -c ${CFLAGS} ${CFLAGS_EX} $< -o $@

@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <stdlib.h>
-#include "auxiliary.h"
 #include "priority_queue.h"
+#include "utilities.h"
 
 /*
  * Swaps two elements in priority queue

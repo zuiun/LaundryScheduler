@@ -13,6 +13,8 @@
         "cstring": "c",
         "unordered_map": "c",
         "initializer_list": "c",
-        "random": "c"
+        "random": "c",
+        "utilities.h": "c",
+        "priority_queue.h": "c"
     }
 }

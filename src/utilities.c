@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include "auxiliary.h"
+#include "utilities.h"
 
 bool is_standard_stream (FILE* const stream) {
     assert (stream != NULL);

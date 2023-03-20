@@ -1,4 +1,3 @@
-# File extension is .tst
 # No comments or extra newlines
 <number of people>
 # Repeat following for each person
